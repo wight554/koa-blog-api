@@ -1,0 +1,55 @@
+
+
+<div>Post: <%= post.name %></div>
+<% let username %>
+<% if (typeof(user) !== "undefined") { %>
+<%  username = user.username %>
+<% } %>
+<div>
+  <table>
+    <% if (post.comments.length !== 0) { %>
+    <thead>
+      <td>Comment</td>
+      <td>Author</td>
+      <td>Date</td>
+      <td>Actions</td>
+    </thead>
+    <% } %>
+    <tbody>
+    <% post.comments.forEach((comment,idx) => {  %>
+      <tr>
+        <td><%= comment.name %></td>
+        <td><%= comment.author %></td>
+        <td><%= comment.date.toLocaleString() %></td>
+        <td>
+          <% if (comment.author === username) { %>
+            <a href="/posts/<%= post._id %>/comments/<%= comment._id %>/edit">Edit</a>
+            &nbsp;
+            <form action="/posts/<%= post._id %>/comments/<%= comment._id %>/delete" method="POST" style="display:inline">
+              <a href="javascript:{};" onclick="this.parentNode.submit();">Delete</a>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% if (typeof(username) !== "undefined") { %>
+    <form action="/posts/<%= post._id %>/comments/add" method="POST">
+      <div>
+        <label>
+        <textarea name="name" placeholder="enter your comment here"></textarea>
+        </label>
+      </div>
+      <input type="submit" value="Submit" />
+    </form>
+  <% } %>
+</div>
+
+<a href="/">Back</a>
+&nbsp;
+<% if (post.author === username) { %>
+  <form action="/posts/<%= post._id %>/delete" method="POST" style="display:inline">
+    <a href="javascript:{};" onclick="this.parentNode.submit();">Delete</a>
+  </form>
+<% } %>

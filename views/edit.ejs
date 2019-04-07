@@ -1,0 +1,19 @@
+<h1>edit menu</h1>
+
+<div>Before: <%= message.name %></div>
+
+<form action="/posts<%- type === "comment" ? `/${postid}/comments/` : '/' %><%= message._id %>/update" method="POST">
+  <div>
+    <label>
+      <textarea name="name" placeholder="enter new task name"><%= message.name %></textarea>
+    </label>
+  </div>
+  <input type="submit" value="Submit" />
+</form>
+<div>
+  <a href="/">Back</a>
+  &nbsp;
+  <form action="/posts<%- type === "comment" ? `/comments/` : '/' %><%= message._id %>/delete" method="POST" style="display:inline"">
+    <a href="javascript:{};" onclick="this.parentNode.submit();">Delete</a>
+  </form>
+</div>

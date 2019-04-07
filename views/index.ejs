@@ -1,0 +1,43 @@
+<h1>blog</h1>
+<% let username %>
+<% if (typeof(user) !== "undefined") { %>
+<%  username = user.username %>
+<% } %>
+<table>
+  <% if (posts.length !== 0) { %>
+  <thead>
+    <td>Post</td>
+    <td>Author</td>
+    <td>Date</td>
+    <td>Actions</td>
+  </thead>
+  <% } %>
+  <tbody>
+    <% posts.forEach((post,idx) => {  %>
+      <tr>
+        <td><%= post.name %></td>
+        <td><%= post.author %></td>
+        <td><%= post.date.toLocaleString() %></td>
+        <td>
+          <a href="/posts/<%= post._id %>">Show</a>
+          &nbsp;
+          <% if (post.author === username) { %>
+            <a href="/posts/<%= post._id %>/edit">Edit</a>
+            &nbsp;
+            <form action="/posts/<%= post._id %>/delete" method="POST" style="display:inline">
+              <a href="javascript:{};" onclick="this.parentNode.submit();">Delete</a>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% if (typeof(username) !== "undefined") { %>
+  <div>
+      <a href="/posts/new">new post</a>
+  </div>
+  <p>You are authenticated as <%= username %> <a href="/logout">logout</a></p>
+<% } else { %>
+    <p><a href="/login">Login</a> <a href="/register">Register</a></p>
+<% } %>
