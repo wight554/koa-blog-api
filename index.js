@@ -45,7 +45,7 @@ public
   })
   .post('/posts', bodyParser(), async ctx => {
     const post = new Post(ctx.request.body)
-    post.author = await ctx.state.user.username
+    // post.author = await ctx.state.user.username
     await post.save();
     ctx.body = await post;
   })
@@ -61,7 +61,8 @@ public
     const commentId = ObjectId();
     await Post.updateOne({ _id: ObjectId(ctx.params.id) },
       {$addToSet: {comments: {_id: commentId, name: ctx.request.body.name,
-        author: await ctx.state.user.username}}}
+        // author: await ctx.state.user.username
+      }}}
     )
     const commentsDocument = await Post.findOne({_id: ctx.params.id},{comments: {$elemMatch: {_id: commentId}}});
     ctx.body = commentsDocument.comments[0];
