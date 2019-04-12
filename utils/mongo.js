@@ -16,12 +16,12 @@ const postSchema = new Schema({
     date  : { type: Date, default: Date.now },
     author : String,
   }]
-});
+}, { versionKey: false });
 
 const userSchema = new Schema({
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true }
-});
+}, { versionKey: false });
 
 userSchema.pre('save', function(next){
   this.password = bcrypt.hashSync(this.password, saltRounds);
