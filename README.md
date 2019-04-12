@@ -1,1 +1,1 @@
-Blog app built using Koa + Mongoose + Passport
+Blog api built using Koa + Mongoose + Passport

@@ -1,11 +1,6 @@
 const Koa = require('koa'),
   app = new Koa();
 
-const render = require('koa-ejs'),
-  serve = require('koa-static');
-
-const path = require('path');
-
 const mongo = require('./utils/mongo'),
   Post = mongo.Post,
   User = mongo.User,
@@ -24,10 +19,9 @@ const bodyParser = require('koa-bodyparser')
 app.use(bodyParser())
 
 // authentication
-require('./utils/auth')
+require('./utils/passport')
 const passport = require('koa-passport')
 app.use(passport.initialize())
-app.use(passport.session())
 
 // routes
 const router = require('koa-joi-router')
@@ -36,68 +30,48 @@ const public = router(),
 
 app.use(public.middleware())
 
-app.use(serve(path.join(__dirname, 'public')))
 
-render(app, {
-  root: path.join(__dirname, 'views'),
-  layout: false,
-  viewExt: 'ejs',
-  cache: false,
-  debug: false
-});
+public.prefix('/api')
 
 public
-  .get('/', async ctx => {
+  .get('/posts', async ctx => {
     const posts = await Post.find({})
-    await ctx.render('index', { posts })
+    ctx.body = posts
   })
-  .get('/posts/new', async ctx => {
-    await ctx.render('new');
-  })
-  .get('/posts/:id', async ctx => {
-    const post = await Post.findOne({ _id: ObjectId(ctx.params.id) })
-    await ctx.render('show', { post });
-  })
-  .get('/posts/:id/edit', async ctx => {
-    const post = await Post.findOne({ _id: ObjectId(ctx.params.id) })
-    await ctx.render('edit', message = post, type="post");
-  })
-  .post('/posts/add', bodyParser(), async ctx => {
+  .post('/posts', bodyParser(), async ctx => {
     const post = new Post(ctx.request.body)
     post.author = await ctx.state.user.username
     await post.save();
-    await ctx.redirect('/');
+    ctx.body = await post;
   })
-  .post('/posts/:id/delete', async ctx => {
+  .delete('/posts/:id', async ctx => {
     await Post.deleteOne({ _id: ObjectId(ctx.params.id) })
-    await ctx.redirect('/');
+    ctx.body = { message: "Successfully deleted" };
   })
-  .post('/posts/:id/update', bodyParser(), async ctx => {
+  .put('/posts/:id', bodyParser(), async ctx => {
     await Post.updateOne({ _id: ObjectId(ctx.params.id) }, {$set: {"name": ctx.request.body.name}})
-    await ctx.redirect('/');
+    ctx.body = { message: "Successfully updated" };
   })
-  .post('/posts/:id/comments/add', bodyParser(), async ctx => {
+  .post('/posts/:id/comments/', bodyParser(), async ctx => {
+    const commentId = ObjectId();
     await Post.updateOne({ _id: ObjectId(ctx.params.id) },
-     {$addToSet: {comments: {_id: ObjectId(), name: ctx.request.body.name,
-        author: await ctx.state.user.username}}})
-    await ctx.redirect(`/posts/${ctx.params.id}`)
+      {$addToSet: {comments: {_id: commentId, name: ctx.request.body.name,
+        author: await ctx.state.user.username}}}
+    )
+    const commentsDocument = await Post.findOne({_id: ctx.params.id},{comments: {$elemMatch: {_id: commentId}}});
+    ctx.body = commentsDocument.comments[0];
   })
-  .get('/posts/:id/comments/:cid/edit', async ctx => {
-    const post = await Post.findOne({ _id: ObjectId(ctx.params.id) })
-    const comment = post.comments.find(comment => (comment._id.toString() === ctx.params.cid))
-    await ctx.render('edit', message = comment, postid = ctx.params.id, type="comment");
-  })
-  .post('/posts/:id/comments/:cid/delete', async ctx => {
+  .delete('/posts/:id/comments/:cid/', async ctx => {
     await Post.updateOne({ _id: ObjectId(ctx.params.id) },
       {$pull: {comments: {_id: ObjectId(ctx.params.cid)}}})
-    await ctx.redirect(`/posts/${ctx.params.id}`);
+    ctx.body = { message: "Successfully deleted comment" };
   })
-  .post('/posts/:id/comments/:cid/update', bodyParser(), async ctx => {
+  .put('/posts/:id/comments/:cid/', bodyParser(), async ctx => {
     await Post.updateOne(
       { _id: ObjectId(ctx.params.id), "comments._id": ObjectId(ctx.params.cid) },
       { $set: { "comments.$.name" : ctx.request.body.name } }
    )
-    await ctx.redirect(`/posts/${ctx.params.id}`);
+   ctx.body = { message: "Successfully updated comment" };
   })
   .post('/login',
     passport.authenticate('local', {
@@ -105,12 +79,6 @@ public
       failureRedirect: '/login'
     })
   )
-  .get('/login', async ctx => {
-    await ctx.render('login');
-  })
-  .get('/register', async ctx => {
-    await ctx.render('register', title = "Register user" );
-  })
   .route({
     method: 'post',
     path: '/signup',
@@ -127,7 +95,7 @@ public
         await user.save();
         await ctx.redirect('/');
       } catch(err) {
-        await ctx.render('err', { err }) 
+        console.log(err)
       }
     }
   })
