@@ -30,6 +30,11 @@ const public = router(),
 
 app.use(public.middleware())
 
+const cors = require('@koa/cors');
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 
 public.prefix('/api')
 
