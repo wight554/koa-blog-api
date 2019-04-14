@@ -23,18 +23,17 @@ require('./utils/passport')
 const passport = require('koa-passport')
 app.use(passport.initialize())
 
+const cors = require('@koa/cors');
+app.use(cors({
+  origin: '*'
+}));
+
 // routes
 const router = require('koa-joi-router')
 const public = router(),
   Joi = router.Joi;
 
 app.use(public.middleware())
-
-const cors = require('@koa/cors');
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
 
 public.prefix('/api')
 
