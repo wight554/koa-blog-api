@@ -37,7 +37,7 @@ userSchema.plugin(uniqueValidator)
 const Post = mongoose.model("posts", postSchema)
 const User = mongoose.model("users", userSchema)
 
-mongoose.connect(mongoUrl, { useNewUrlParser: true })
+mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true })
 
 module.exports.Post = Post;
 module.exports.User = User;
