@@ -2,7 +2,7 @@ const mongoose = require("mongoose"),
   uniqueValidator = require('mongoose-unique-validator'),
   { Schema } = mongoose,
   { ObjectId } = mongoose.Types,
-  mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/blog'
+  { mongoUrl } = require("../config/keys");
 
 const bcrypt = require('bcrypt'),
   saltRounds = 10;
