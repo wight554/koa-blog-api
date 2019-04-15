@@ -2,7 +2,7 @@ const passport = require('koa-passport'),
   LocalStrategy = require('passport-local').Strategy;
 
 const mongo = require('./mongo');
-const User = mongo.User;
+const { User } = mongo;
 
 passport.serializeUser(function(user, done) {
   done(null, user._id)

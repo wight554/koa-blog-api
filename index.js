@@ -2,9 +2,7 @@ const Koa = require('koa'),
   app = new Koa();
 
 const mongo = require('./utils/mongo'),
-  Post = mongo.Post,
-  User = mongo.User,
-  ObjectId = mongo.ObjectId;
+  { Post, User, ObjectId } = mongo;
 
 // trust proxy
 app.proxy = true
@@ -31,7 +29,7 @@ app.use(cors({
 // routes
 const router = require('koa-joi-router')
 const public = router(),
-  Joi = router.Joi;
+  { Joi } = router;
 
 app.use(public.middleware())
 
