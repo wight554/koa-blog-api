@@ -1,5 +1,5 @@
 const jwt = require("koa-jwt");
-const { secret } = require("./config/keys");
+const { secret } = require("../config/keys");
 const jwtInstance = jwt({secret: secret});
 const jsonwebtoken = require("jsonwebtoken");
 
@@ -21,4 +21,9 @@ module.exports.errorHandler = () => JWTErrorHandler;
 
 module.exports.issue = payload => {
     return jsonwebtoken.sign(payload, secret);
+};
+
+module.exports.getUserFromToken = token => {
+    const payload = jsonwebtoken.decode(token.replace(/bearer /ig, ''));
+    return payload.user
 };
