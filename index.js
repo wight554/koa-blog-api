@@ -41,8 +41,8 @@ public
   .post("/login", bodyParser(), async ctx => {
     await passport.authenticate('local', (error, user) => {
       if (user == false || error) {
-        ctx.body = { message : error || 'Authorization error'}
         ctx.status = 401
+        ctx.body = { message : error || 'Authorization error'}
       } else {
         const payload = {
           id: user.id,
@@ -74,8 +74,8 @@ public
         await user.save();
         ctx.body = await user;
       } catch(err) {
-        ctx.status = 403
         ctx.body = { message: err.message}
+        ctx.status = 403
       }
     }
   })
@@ -92,8 +92,8 @@ secured
       await Post.deleteOne({ _id: ObjectId(ctx.params.id) })
       return ctx.body = { message: "Successfully deleted" };
     } else {
-      ctx.body = { message: "You are not the author" }
       ctx.status = 400
+      ctx.body = { message: "You are not the author" }
     }
   })
   .put('/posts/:id', bodyParser(), async ctx => {
@@ -147,7 +147,7 @@ const checkPostAuthor = (token, pid) => {
 }
 
 const checkCommentAuthor = (token, pid, cid) => {
-  const user = getCurrentUser(token)
+  const user = getUserFromToken(token)
   return Post.findOne({_id: pid},{comments: {$elemMatch: {_id: cid}}})
     .then(post => post.comments[0].author === user.username)
 }
