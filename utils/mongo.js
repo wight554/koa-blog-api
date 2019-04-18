@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt'),
 
 const postSchema = new Schema({
 	name  : String,
+	title : String,
 	date  : { type: Date, default: Date.now },
   author  : String,
   comments : [{
