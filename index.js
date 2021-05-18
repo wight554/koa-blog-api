@@ -189,8 +189,16 @@ secured
             newUser.password = password;
           }
           await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...newUser } });
-          const users = await User.find({ _id: ObjectId(ctx.request.body.id), password: undefined });
-          ctx.body = users[0];
+          const users = await User.find({ _id: ObjectId(ctx.request.body.id) });
+          const user = users[0];
+          const payload = {
+            id: user.id,
+            username: user.username,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          };
+          const token = issue({ user: payload });
+          ctx.body = { ...payload, token };
         } catch (err) {
           ctx.body = { message: err.message };
           ctx.status = 403;
