@@ -41,6 +41,13 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+userSchema.pre('updateOne', function (next) {
+  if (this.password) {
+    this.password = bcrypt.hashSync(this.password, saltRounds);
+  }
+  next();
+});
+
 userSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compareSync(candidatePassword, this.password);
 };

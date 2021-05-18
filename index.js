@@ -155,7 +155,46 @@ secured
       ctx.status = 400;
       ctx.body = { message: 'You are not the author' };
     }
+  })
+  .route({
+    method: 'put',
+    path: '/update-user',
+    validate: {
+      body: {
+        username: Joi.string().max(100),
+        firstName: Joi.string().max(100),
+        lastName: Joi.string().max(100),
+        password: Joi.string().max(100),
+        id: Joi.string().max(100),
+      },
+      type: 'json',
+      continueOnError: true,
+    },
+    handler: async (ctx) => {
+      if (ctx.invalid && typeof ctx.invalid !== 'undefined') {
+        ctx.status = ctx.invalid.body.status;
+        return (ctx.body = { message: ctx.invalid.body.msg });
+      }
+      const isCurrentUser = await checkCurrentUser(ctx.headers.authorization, ctx.request.body.id);
+      if (isCurrentUser) {
+        try {
+          const user = await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...ctx.request.body } });
+          ctx.body = await user;
+        } catch (err) {
+          ctx.body = { message: err.message };
+          ctx.status = 403;
+        }
+      } else {
+        ctx.status = 400;
+        ctx.body = { message: 'You are not allowed to do this' };
+      }
+    },
   });
+
+const checkCurrentUser = (token, id) => {
+  const user = getUserFromToken(token);
+  return User.findById(ObjectId(id)).then((u) => u.id === user.id);
+};
 
 const checkPostAuthor = (token, pid) => {
   const user = getUserFromToken(token);
