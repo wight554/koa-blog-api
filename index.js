@@ -178,8 +178,19 @@ secured
       const isCurrentUser = await checkCurrentUser(ctx.headers.authorization, ctx.request.body.id);
       if (isCurrentUser) {
         try {
-          await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...ctx.request.body } });
-          ctx.body = await User.find({ _id: ObjectId(ctx.request.body.id) });
+          const { username, firstName, lastName, id, password } = ctx.request.body;
+          const newUser = {
+            username,
+            firstName,
+            lastName,
+            id,
+          };
+          if (password) {
+            newUser.password = password;
+          }
+          await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...newUser } });
+          const users = await User.find({ _id: ObjectId(ctx.request.body.id), password: undefined });
+          ctx.body = users[0];
         } catch (err) {
           ctx.body = { message: err.message };
           ctx.status = 403;
