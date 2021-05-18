@@ -82,7 +82,7 @@ public
       const user = await new User(ctx.request.body);
       try {
         await user.save();
-        ctx.body = await user;
+        ctx.body = { ...(await user), password: undefined };
       } catch (err) {
         ctx.body = { message: err.message };
         ctx.status = 403;
@@ -178,8 +178,8 @@ secured
       const isCurrentUser = await checkCurrentUser(ctx.headers.authorization, ctx.request.body.id);
       if (isCurrentUser) {
         try {
-          const user = await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...ctx.request.body } });
-          ctx.body = await user;
+          await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...ctx.request.body } });
+          ctx.body = await User.find({ _id: ObjectId(ctx.request.body.id) });
         } catch (err) {
           ctx.body = { message: err.message };
           ctx.status = 403;
