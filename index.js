@@ -121,7 +121,7 @@ secured
     await Post.updateOne(
       { _id: ObjectId(ctx.params.id) },
       {
-        $addToSet: { comments: { _id: commentId, name: ctx.request.body.name, author: await ctx.request.body.author } },
+        $addToSet: { comments: { _id: commentId, ...(await ctx.request.body) } },
       }
     );
     const commentsDocument = await Post.findOne(
