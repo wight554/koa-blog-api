@@ -13,13 +13,16 @@ const postSchema = new Schema(
     title: String,
     date: { type: Date, default: Date.now },
     author: { type: Schema.Types.ObjectId, ref: 'User' },
-    comments: [
-      {
-        name: String,
-        date: { type: Date, default: Date.now },
-        author: { type: Schema.Types.ObjectId, ref: 'User' },
-      },
-    ],
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
+  },
+  { versionKey: false }
+);
+
+const commentSchema = new Schema(
+  {
+    name: String,
+    date: { type: Date, default: Date.now },
+    author: { type: Schema.Types.ObjectId, ref: 'User' },
   },
   { versionKey: false }
 );
@@ -53,10 +56,12 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 userSchema.plugin(uniqueValidator);
 
 const Post = mongoose.model('Post', postSchema);
+const Comment = mongoose.model('Comment', commentSchema);
 const User = mongoose.model('User', userSchema);
 
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
 
 module.exports.Post = Post;
+module.exports.Comment = Comment;
 module.exports.User = User;
 module.exports.ObjectId = ObjectId;

@@ -2,7 +2,7 @@ const Koa = require('koa'),
   app = new Koa();
 
 const mongo = require('./utils/mongo'),
-  { Post, User, ObjectId } = mongo;
+  { Post, Comment, User, ObjectId } = mongo;
 
 // body parser
 const bodyParser = require('koa-bodyparser');
@@ -41,7 +41,14 @@ public
     ctx.body = posts;
   })
   .get('/posts/:id', async (ctx) => {
-    const posts = await Post.find({ _id: ObjectId(ctx.params.id) }).populate('author');
+    const posts = await Post.find({ _id: ObjectId(ctx.params.id) })
+      .populate('author')
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'author',
+        },
+      });
     ctx.body = posts[0];
   })
   .post('/login', bodyParser(), async (ctx) => {
@@ -117,26 +124,17 @@ secured
     }
   })
   .post('/posts/:id/comments/', bodyParser(), async (ctx) => {
-    const commentId = ObjectId();
-    await Post.updateOne(
-      { _id: ObjectId(ctx.params.id) },
-      {
-        $addToSet: { comments: { _id: commentId, ...(await ctx.request.body) } },
-      }
-    );
-    const commentsDocument = await Post.findOne(
-      { _id: ctx.params.id },
-      { comments: { $elemMatch: { _id: commentId } } }
-    );
-    ctx.body = commentsDocument.comments[0];
+    const comment = new Comment(ctx.request.body);
+    const response = await comment.save();
+    await Post.updateOne({ _id: ObjectId(ctx.params.id) }, { $addToSet: { comments: response._id } });
+    const comments = await Comment.find({ _id: response._id });
+    ctx.body = comments[0];
   })
   .delete('/posts/:id/comments/:cid/', async (ctx) => {
-    const isAuthor = await checkCommentAuthor(ctx.headers.authorization, ctx.params.id, ctx.params.cid);
+    const isAuthor = await checkCommentAuthor(ctx.headers.authorization, ctx.params.cid);
     if (isAuthor) {
-      await Post.updateOne(
-        { _id: ObjectId(ctx.params.id) },
-        { $pull: { comments: { _id: ObjectId(ctx.params.cid) } } }
-      );
+      await Post.updateOne({ _id: ObjectId(ctx.params.id) }, { $pull: { comments: ObjectId(ctx.params.cid) } });
+      await Comment.deleteOne({ _id: ObjectId(ctx.params.cid) });
       ctx.body = { message: 'Successfully deleted comment' };
     } else {
       ctx.status = 400;
@@ -144,12 +142,9 @@ secured
     }
   })
   .put('/posts/:id/comments/:cid/', bodyParser(), async (ctx) => {
-    const isAuthor = await checkCommentAuthor(ctx.headers.authorization, ctx.params.id, ctx.params.cid);
+    const isAuthor = await checkCommentAuthor(ctx.headers.authorization, ctx.params.cid);
     if (isAuthor) {
-      await Post.updateOne(
-        { _id: ObjectId(ctx.params.id), 'comments._id': ObjectId(ctx.params.cid) },
-        { $set: { 'comments.$.name': ctx.request.body.name } }
-      );
+      await Comment.updateOne({ _id: ObjectId(ctx.params.cid) }, { $set: { name: ctx.request.body.name } });
       ctx.body = { message: 'Successfully updated comment' };
     } else {
       ctx.status = 400;
@@ -220,11 +215,10 @@ const checkPostAuthor = (token, pid) => {
   return Post.findById(ObjectId(pid)).then((post) => post.author === user.username);
 };
 
-const checkCommentAuthor = (token, pid, cid) => {
+const checkCommentAuthor = (token, cid) => {
   const user = getUserFromToken(token);
-  return Post.findOne({ _id: pid }, { comments: { $elemMatch: { _id: cid } } }).then(
-    (post) => post.comments[0].author === user.username
-  );
+  return Comment.findById(ObjectId(cid)).then((comment) => comment.author === user.username);
 };
+
 const port = process.env.PORT || 8000;
 app.listen(port, () => console.log('Server listening on', port));
