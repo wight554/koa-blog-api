@@ -12,14 +12,12 @@ const postSchema = new Schema(
     name: String,
     title: String,
     date: { type: Date, default: Date.now },
-    author: String,
-    authorName: String,
+    author: { type: Schema.Types.ObjectId, ref: 'User' },
     comments: [
       {
         name: String,
         date: { type: Date, default: Date.now },
-        author: String,
-        authorName: String,
+        author: { type: Schema.Types.ObjectId, ref: 'User' },
       },
     ],
   },
@@ -54,8 +52,8 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 
 userSchema.plugin(uniqueValidator);
 
-const Post = mongoose.model('posts', postSchema);
-const User = mongoose.model('users', userSchema);
+const Post = mongoose.model('Post', postSchema);
+const User = mongoose.model('User', userSchema);
 
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true });
 

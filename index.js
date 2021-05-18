@@ -37,11 +37,11 @@ secured.prefix('/api');
 
 public
   .get('/posts', async (ctx) => {
-    const posts = await Post.find({});
+    const posts = await Post.find({}).populate('author');
     ctx.body = posts;
   })
   .get('/posts/:id', async (ctx) => {
-    const posts = await Post.find({ _id: ObjectId(ctx.params.id) });
+    const posts = await Post.find({ _id: ObjectId(ctx.params.id) }).populate('author');
     ctx.body = posts[0];
   })
   .post('/login', bodyParser(), async (ctx) => {
