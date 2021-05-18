@@ -67,8 +67,8 @@ public
     validate: {
       body: {
         username: Joi.string().max(100),
-        firstName: Joi.string().max(100),
-        lastName: Joi.string().max(100),
+        firstName: Joi.string().max(100).optional().allow(''),
+        lastName: Joi.string().max(100).optional().allow(''),
         password: Joi.string().max(100),
       },
       type: 'json',
@@ -161,10 +161,10 @@ secured
     path: '/update-user',
     validate: {
       body: {
-        username: Joi.string().max(100),
-        firstName: Joi.string().max(100),
-        lastName: Joi.string().max(100),
-        password: Joi.string().max(100),
+        username: Joi.string().max(100).optional().allow(''),
+        firstName: Joi.string().max(100).optional().allow(''),
+        lastName: Joi.string().max(100).optional().allow(''),
+        password: Joi.string().max(100).optional().allow(''),
         id: Joi.string().max(100),
       },
       type: 'json',
