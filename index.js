@@ -40,6 +40,10 @@ public
     const posts = await Post.find({});
     ctx.body = posts;
   })
+  .get('/posts/:id', async (ctx) => {
+    const posts = await Post.find({ _id: ObjectId(ctx.params.id) });
+    ctx.body = posts[0];
+  })
   .post('/login', bodyParser(), async (ctx) => {
     await passport.authenticate('local', (error, user) => {
       if (user == false || error) {
