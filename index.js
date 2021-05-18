@@ -212,12 +212,12 @@ const checkCurrentUser = (token, id) => {
 
 const checkPostAuthor = (token, pid) => {
   const user = getUserFromToken(token);
-  return Post.findById(ObjectId(pid)).then((post) => post.author === user.username);
+  return Post.findById(ObjectId(pid)).then((post) => String(post.author) === user.id);
 };
 
 const checkCommentAuthor = (token, cid) => {
   const user = getUserFromToken(token);
-  return Comment.findById(ObjectId(cid)).then((comment) => comment.author === user.username);
+  return Comment.findById(ObjectId(cid)).then((comment) => String(comment.author) === user.id);
 };
 
 const port = process.env.PORT || 8000;
