@@ -13,11 +13,13 @@ const postSchema = new Schema(
     title: String,
     date: { type: Date, default: Date.now },
     author: String,
+    authorName: String,
     comments: [
       {
         name: String,
         date: { type: Date, default: Date.now },
         author: String,
+        authorName: String,
       },
     ],
   },
