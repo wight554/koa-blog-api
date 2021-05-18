@@ -82,7 +82,7 @@ public
       const user = await new User(ctx.request.body);
       try {
         await user.save();
-        ctx.body = { ...(await user), password: undefined };
+        ctx.body = { message: 'Successfully registered' };
       } catch (err) {
         ctx.body = { message: err.message };
         ctx.status = 403;
