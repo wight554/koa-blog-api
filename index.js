@@ -53,6 +53,8 @@ public
         const payload = {
           id: user.id,
           username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
         };
         const token = issue({ user: payload });
         ctx.body = { ...payload, token };
@@ -65,6 +67,8 @@ public
     validate: {
       body: {
         username: Joi.string().max(100),
+        firstName: Joi.string().max(100),
+        lastName: Joi.string().max(100),
         password: Joi.string().max(100),
       },
       type: 'json',
