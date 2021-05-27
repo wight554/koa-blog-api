@@ -37,16 +37,17 @@ secured.prefix('/api');
 
 public
   .get('/posts', async (ctx) => {
-    const posts = await Post.find({}).populate('author');
+    const posts = await Post.find({}).populate('author', '-password');
     ctx.body = posts;
   })
   .get('/posts/:id', async (ctx) => {
     const posts = await Post.find({ _id: ObjectId(ctx.params.id) })
-      .populate('author')
+      .populate('author', '-password')
       .populate({
         path: 'comments',
         populate: {
           path: 'author',
+          select: '-password',
         },
       });
     ctx.body = posts[0];
@@ -184,7 +185,7 @@ secured
             newUser.password = password;
           }
           await User.updateOne({ _id: ObjectId(ctx.request.body.id) }, { $set: { ...newUser } });
-          const users = await User.find({ _id: ObjectId(ctx.request.body.id) });
+          const users = await User.find({ _id: ObjectId(ctx.request.body.id) }).select('-password');
           const user = users[0];
           const payload = {
             id: user.id,
