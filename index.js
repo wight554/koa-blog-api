@@ -128,7 +128,7 @@ secured
     const comment = new Comment(ctx.request.body);
     const response = await comment.save();
     await Post.updateOne({ _id: ObjectId(ctx.params.id) }, { $addToSet: { comments: response._id } });
-    const comments = await Comment.find({ _id: response._id });
+    const comments = await Comment.find({ _id: response._id }).populate('author', '-password');
     ctx.body = comments[0];
   })
   .delete('/posts/:id/comments/:cid/', async (ctx) => {
